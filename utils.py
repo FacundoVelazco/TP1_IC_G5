@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 import numpy as np
+from keras import layers, models, optimizers
 
 dias_semana = {
     "monday": 0,
@@ -11,8 +12,8 @@ dias_semana = {
 }
 
 
-def getData():
-    with open('nasdaq-index.json', 'r') as json_file: data = json.load(json_file)
+def getData(path):
+    with open(path, 'r') as json_file: data = json.load(json_file)
     result = list(map(lambda x: {"open": x["Open"], "date": x["Date"]}, data))
     return result
 
@@ -34,8 +35,22 @@ def normalize(data, max, min):
     return normalized_data
 
 
+def desnormalizeList(data, max, min):
+    # como una lista
+    desnormalized_items = []
+    for item in data:
+        desnormalized_open = item[0] * (max - min) + min
+        desnormalized_items.append(desnormalized_open)
+    return desnormalized_items
+
+
 def desnormalize(data, max, min):
-    return []
+    # como una lista
+    desnormalized_items = []
+    for item in data:
+        desnormalized_open = item * (max - min) + min
+        desnormalized_items.append(desnormalized_open)
+    return desnormalized_items
 
 
 def genTrainDataFourDaysBf(data):
@@ -49,5 +64,17 @@ def genTrainDataFourDaysBf(data):
             # Agregar el valor del día de la semana actual en formato binario
             train_data.append(open_values + data[i]["day_of_week"])
             train_labels.append(data[i]["open"])
+    trainBorder = len(train_data)//100 * 60
+    validationBorder = len(train_data)//100 * 80
+    return (train_data[:trainBorder], train_labels[:trainBorder]), (train_data[trainBorder:validationBorder], train_labels[trainBorder:validationBorder]), (
+    train_data[validationBorder:], train_labels[validationBorder:])
 
-    return (train_data, train_labels), ([], [])
+
+def build_model_regression(input_data_shape):
+    model = models.Sequential()
+    model.add(layers.Dense(20, activation='relu', input_shape=[input_data_shape, ]))
+    model.add(layers.Dense(40, activation='relu'))
+    model.add(layers.Dense(20, activation='relu'))
+    model.add(layers.Dense(1))
+    model.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
+    return model

@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-with open('nasdaq-index.json', 'r') as json_file: data = json.load(json_file)
+with open('nasdaq-index-original.json', 'r') as json_file: data = json.load(json_file)
 
 result = list(map(lambda x: {"open": x["Open"], "date": x["Date"]}, data))
 open_data = []

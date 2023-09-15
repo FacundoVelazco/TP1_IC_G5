@@ -1,31 +1,37 @@
 import matplotlib.pyplot as plt
-import tensorflow as tf
+import keras
 import utils
-import numpy as np
 
-raw_data = utils.getData()
+path = 'nasdaq-index-bigdata.json'
 
+raw_data = utils.getData(path)
+print(raw_data)
 max_open = max(item["open"] for item in raw_data)
 min_open = min(item["open"] for item in raw_data)
 
-normalized_data = utils.normalize(raw_data,max_open,min_open)
+normalized_data = utils.normalize(raw_data, max_open, min_open)
 
-(train_data_4days,train_labels_4days),(test_data_4days,test_labels_4days) = utils.genTrainDataFourDaysBf(normalized_data)
+((train_data_4days, train_labels_4days), (validation_data_4days, validation_labels_4days),
+ (test_data_4days, test_labels_4days)) = utils.genTrainDataFourDaysBf(normalized_data)
 
-oculta1 = tf.keras.layers.Dense(units=20,input_shape=[9, ])
-oculta2 = tf.keras.layers.Dense(units=40)
-oculta3 = tf.keras.layers.Dense(units=20)
-salida = tf.keras.layers.Dense(units=1)
-modelo = tf.keras.Sequential([oculta1, oculta2, oculta3, salida])
+model = utils.build_model_regression(len(train_data_4days[0]))
 
-modelo.compile(
-    optimizer=tf.keras.optimizers.Adam(0.1),
-    loss='mean_squared_error',
-    metrics='mse'
-)
 print("Comenzando entrenamiento...")
-history = modelo.fit(train_data_4days, train_labels_4days, epochs=5, verbose=False)
+
+history = model.fit(train_data_4days, train_labels_4days, epochs=50,
+                    validation_data=(validation_data_4days, validation_labels_4days),
+                    verbose=False)
 
 print("Metodo entrenado!")
 
-print(history)
+loss = history.history['loss']
+history_test = model.evaluate(test_data_4days, test_labels_4days)
+predicted_values = model.predict(test_data_4days)
+predicted_values = utils.desnormalizeList(predicted_values, max_open, min_open)
+y_data = []
+for item in raw_data: y_data.append(item['open'])
+plt.plot(utils.desnormalize(test_labels_4days[len(predicted_values)-20:], max_open, min_open))
+plt.plot(predicted_values[len(predicted_values)-20:])
+
+# plt.plot(loss)
+plt.show()
