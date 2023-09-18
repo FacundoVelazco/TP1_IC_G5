@@ -53,19 +53,39 @@ def desnormalize(data, max, min):
     return desnormalized_items
 
 
-def genTrainDataFourDaysBf(data):
+def genTrainData4DaysBf(data):
     train_labels = []
     train_data = []
     for i, obj in enumerate(data):
         if i >= 4:
             # Obtener los valores "open" de los cuatro días anteriores
             open_values = []
-            for j in range(i - 4, i): open_values.append(data[j]["open"])
+            for j in range(i - 4, i):
+                open_values.append(data[j]["open"])
             # Agregar el valor del día de la semana actual en formato binario
             train_data.append(open_values + data[i]["day_of_week"])
             train_labels.append(data[i]["open"])
-    trainBorder = len(train_data) // 100 * 60
-    validationBorder = len(train_data) // 100 * 80
+    trainBorder = int((len(train_data) / 100) * 60)
+    validationBorder = int((len(train_data) / 100) * 80)
+    return (train_data[:trainBorder], train_labels[:trainBorder]), (
+        train_data[trainBorder:validationBorder], train_labels[trainBorder:validationBorder]), (
+        train_data[validationBorder:], train_labels[validationBorder:])
+
+
+def genTrainData9DaysBf(data):
+    train_labels = []
+    train_data = []
+    for i, obj in enumerate(data):
+        if i >= 9:
+            # Obtener los valores "open" de los cuatro días anteriores
+            open_values = []
+            for j in range(i - 9, i):
+                open_values.append(data[j]["open"])
+            # Agregar el valor del día de la semana actual en formato binario
+            train_data.append(open_values + data[i]["day_of_week"])
+            train_labels.append(data[i]["open"])
+    trainBorder = int((len(train_data) / 100) * 60)
+    validationBorder = int((len(train_data) / 100) * 80)
     return (train_data[:trainBorder], train_labels[:trainBorder]), (
         train_data[trainBorder:validationBorder], train_labels[trainBorder:validationBorder]), (
         train_data[validationBorder:], train_labels[validationBorder:])
