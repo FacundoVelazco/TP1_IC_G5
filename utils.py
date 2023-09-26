@@ -98,6 +98,7 @@ def build_model_regression(input_data_shape):
     model.add(layers.Dense(15, activation='sigmoid'))
     model.add(layers.Dense(1))
     model.compile(optimizer='Adam', loss='mse', metrics=['mse'])
+
     return model
 
 
