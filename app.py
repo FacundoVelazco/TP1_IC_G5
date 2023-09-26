@@ -3,7 +3,7 @@ import Graphs
 import tradingBot
 from sklearn.metrics import mean_squared_error
 
-path = 'nasdaq-index-365.json'
+path = 'nasdaq-index-original.json'
 
 raw_data = utils.getData(path)
 
