@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
-import keras
 import utils
+import Graphs
 import tradingBot
+from sklearn.metrics import mean_squared_error
 
 path = 'nasdaq-index-365.json'
 
@@ -14,23 +14,27 @@ normalized_data = utils.normalize(raw_data, max_open, min_open)
 
 ((train_data_4days, train_labels_4days), (validation_data_4days, validation_labels_4days),
  (test_data_4days, test_labels_4days)) = utils.genTrainData4DaysBf(normalized_data)
+
 model = utils.build_model_regression(len(train_data_4days[0]))
 
 print("Comenzando entrenamiento...")
 
-history = model.fit(train_data_4days, train_labels_4days, epochs=50,
+history = model.fit(train_data_4days, train_labels_4days, epochs=40,
                     validation_data=(validation_data_4days, validation_labels_4days),
                     verbose=False)
 
 print("Metodo entrenado!")
 
-#loss = history.history['loss']
-#history_test = model.evaluate(test_data_4days, test_labels_4days)
 predicted_values = model.predict(test_data_4days)
 predicted_values = utils.desnormalizeList(predicted_values, max_open, min_open)
 real_values = utils.desnormalize(test_labels_4days, max_open, min_open)
 
-simu_balance = tradingBot.simulation(real_values,predicted_values)
-utils.plotResults([simu_balance])
-utils.plotResults([predicted_values])
-utils.plotResults([real_values,predicted_values])
+mse = mean_squared_error(real_values, predicted_values)
+
+print('Error cuadratico medio: ' + str(mse))
+print("=====================================")
+
+simu_balance = tradingBot.simulation(real_values, predicted_values)
+Graphs.plotResultsLoss([history.history['loss']])
+Graphs.plotResultsStocks([real_values, predicted_values])
+Graphs.plotResultsTrades([simu_balance])
