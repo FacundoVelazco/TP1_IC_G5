@@ -93,11 +93,11 @@ def genTrainData9DaysBf(data):
 
 def build_model_regression(input_data_shape):
     model = models.Sequential()
-    model.add(layers.Dense(20, activation='relu', input_shape=[input_data_shape, ]))
-    model.add(layers.Dense(40, activation='relu'))
-    model.add(layers.Dense(20, activation='relu'))
+    model.add(layers.Dense(15, activation='sigmoid', input_shape=[input_data_shape, ]))
+    model.add(layers.Dense(35, activation='sigmoid'))
+    model.add(layers.Dense(15, activation='sigmoid'))
     model.add(layers.Dense(1))
-    model.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
+    model.compile(optimizer='Adam', loss='mse', metrics=['mse'])
     return model
 
 
